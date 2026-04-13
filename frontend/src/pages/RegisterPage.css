@@ -1,0 +1,305 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  width: 100%;
+  min-height: 100%;
+}
+
+.register-page.dark {
+  --bg: #11161c;
+  --card-bg: #171d24;
+  --card-border: rgba(255, 255, 255, 0.06);
+
+  --title: #f3f5f7;
+  --text: #a9b1ba;
+  --label: #f3f5f7;
+
+  --input-bg: #1d232b;
+  --input-border: rgba(255, 255, 255, 0.08);
+  --input-text: #f3f5f7;
+  --placeholder: #8f98a3;
+
+  --button-bg: #8f98a3;
+  --button-hover: #a0a9b3;
+  --button-text: #ffffff;
+
+  --ghost-button-bg: #2a3139;
+  --ghost-button-hover: #353d46;
+  --ghost-button-text: #f3f5f7;
+
+  --link: #c9d0d7;
+  --theme-bg: #000000;
+  --theme-border: #2a2a2a;
+  --theme-text: #ffffff;
+
+  --success-bg: rgba(120, 200, 140, 0.12);
+  --success-border: rgba(120, 200, 140, 0.24);
+  --success-text: #9bd6a7;
+
+  --error-bg: rgba(255, 120, 120, 0.12);
+  --error-border: rgba(255, 120, 120, 0.24);
+  --error-text: #f0b0b0;
+}
+
+.register-page.light {
+  --bg: #eef1f4;
+  --card-bg: #ffffff;
+  --card-border: rgba(34, 42, 50, 0.08);
+
+  --title: #222a32;
+  --text: #5e6974;
+  --label: #222a32;
+
+  --input-bg: #ffffff;
+  --input-border: rgba(34, 42, 50, 0.08);
+  --input-text: #222a32;
+  --placeholder: #7e8892;
+
+  --button-bg: #7e8892;
+  --button-hover: #9099a3;
+  --button-text: #ffffff;
+
+  --ghost-button-bg: #dde3e8;
+  --ghost-button-hover: #d2d9df;
+  --ghost-button-text: #222a32;
+
+  --link: #3b4650;
+  --theme-bg: #ffffff;
+  --theme-border: #dcdcdc;
+  --theme-text: #000000;
+
+  --success-bg: rgba(120, 200, 140, 0.12);
+  --success-border: rgba(120, 200, 140, 0.24);
+  --success-text: #2f7e43;
+
+  --error-bg: rgba(255, 120, 120, 0.12);
+  --error-border: rgba(255, 120, 120, 0.24);
+  --error-text: #b55a5a;
+}
+
+.register-page {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--title);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  position: relative;
+  font-family: Inter, Arial, sans-serif;
+}
+
+.register-brand {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--title);
+  letter-spacing: 0.8px;
+}
+
+.register-card {
+  width: 100%;
+  max-width: 430px;
+  padding: 34px 28px;
+  border-radius: 24px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.06);
+}
+
+.register-card h1 {
+  margin: 0 0 12px;
+  text-align: center;
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--title);
+}
+
+.register-subtitle {
+  margin: 0 0 24px;
+  text-align: center;
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.register-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.register-field label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--label);
+}
+
+.register-field input {
+  width: 100%;
+  min-height: 50px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--input-text);
+  font-size: 15px;
+  outline: none;
+  transition: 0.2s ease;
+}
+
+.register-field input::placeholder {
+  color: var(--placeholder);
+}
+
+.register-field input:focus {
+  border-color: var(--button-bg);
+}
+
+.register-field small {
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.register-password-wrap {
+  position: relative;
+}
+
+.register-password-wrap input {
+  padding-right: 100px;
+}
+
+.register-eye-btn {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.register-submit {
+  margin-top: 6px;
+  min-height: 50px;
+  border: none;
+  border-radius: 999px;
+  background: var(--button-bg);
+  color: var(--button-text);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.register-submit:hover {
+  background: var(--button-hover);
+  transform: translateY(-1px);
+}
+
+.register-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.register-alert {
+  border-radius: 18px;
+  padding: 14px 16px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.register-alert.success {
+  background: var(--success-bg);
+  border: 1px solid var(--success-border);
+  color: var(--success-text);
+}
+
+.register-alert.error {
+  background: var(--error-bg);
+  border: 1px solid var(--error-border);
+  color: var(--error-text);
+}
+
+.register-links {
+  margin-top: 22px;
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.register-links a {
+  color: var(--link);
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.register-links a:hover {
+  text-decoration: underline;
+}
+
+.register-footer {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  color: var(--text);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.register-footer a {
+  color: var(--text);
+  text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+  .register-brand {
+    top: 14px;
+    left: 14px;
+    font-size: 16px;
+  }
+
+
+  .register-card {
+    padding: 24px 18px;
+    border-radius: 20px;
+  }
+
+  .register-card h1 {
+    font-size: 30px;
+  }
+
+  .register-links {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .register-footer {
+    white-space: normal;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: calc(100% - 24px);
+    text-align: center;
+  }
+}
