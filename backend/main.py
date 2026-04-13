@@ -1,4 +1,9 @@
 import re
+import io
+import base64
+
+import pyotp
+import qrcode
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, field_validator
@@ -13,7 +18,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["http://localhost:5173", "http://localhost:5174"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -26,6 +31,13 @@ PASSWORD_UPPER_REGEX = re.compile(r"[A-Z]")
 PASSWORD_LOWER_REGEX = re.compile(r"[a-z]")
 PASSWORD_DIGIT_REGEX = re.compile(r"\d")
 PASSWORD_SPECIAL_REGEX = re.compile(r"[^\w\s]")
+
+
+def make_qr_base64(data: str) -> str:
+    img = qrcode.make(data)
+    buffer = io.BytesIO()
+    img.save(buffer, format="PNG")
+    return base64.b64encode(buffer.getvalue()).decode("utf-8")
 
 
 class RegisterRequest(BaseModel):
@@ -57,13 +69,23 @@ class RegisterRequest(BaseModel):
         return value
 
 
+class RegisterConfirm2FARequest(BaseModel):
+    login: str
+    otp_code: str
+
+
 class LoginRequest(BaseModel):
     login: str
     password: str
 
+class Verify2FARequest(BaseModel):
+    login: str
+    otp_code: str
+
 @app.get("/")
 async def root():
     return {"message": "Backend is running"}
+
 
 @app.post("/register")
 async def register(user: RegisterRequest):
@@ -78,9 +100,21 @@ async def register(user: RegisterRequest):
 
         hashed_password = password_hash.hash(user.password)
 
+        secret = pyotp.random_base32()
+        totp = pyotp.TOTP(secret)
+
+        provisioning_uri = totp.provisioning_uri(
+            name=user.login,
+            issuer_name="POAIBOT"
+        )
+
+        qr_code_base64 = make_qr_base64(provisioning_uri)
+
         new_user = User(
             login=user.login,
-            password_hash=hashed_password
+            password_hash=hashed_password,
+            totp_secret=secret,
+            is_2fa_enabled=False,
         )
 
         session.add(new_user)
@@ -88,9 +122,38 @@ async def register(user: RegisterRequest):
         await session.refresh(new_user)
 
         return {
-            "message": "Пользователь успешно зарегистрирован",
+            "message": "Пользователь создан. Подтвердите 2FA-код",
             "id": new_user.id,
-            "login": new_user.login
+            "login": new_user.login,
+            "qr_code_base64": qr_code_base64,
+            "otpauth_url": provisioning_uri,
+        }
+
+
+@app.post("/register/confirm-2fa")
+async def register_confirm_2fa(data: RegisterConfirm2FARequest):
+    async with SessionLocal() as session:
+        result = await session.execute(
+            select(User).where(User.login == data.login)
+        )
+        user = result.scalar_one_or_none()
+
+        if user is None:
+            raise HTTPException(status_code=404, detail="Пользователь не найден")
+
+        if not user.totp_secret:
+            raise HTTPException(status_code=400, detail="2FA не настроен")
+
+        totp = pyotp.TOTP(user.totp_secret)
+
+        if not totp.verify(data.otp_code):
+            raise HTTPException(status_code=400, detail="Неверный код подтверждения")
+
+        user.is_2fa_enabled = True
+        await session.commit()
+
+        return {
+            "message": "Регистрация завершена, 2FA успешно включен"
         }
 
 
@@ -107,6 +170,40 @@ async def login(user: LoginRequest):
 
         if not password_hash.verify(user.password, db_user.password_hash):
             raise HTTPException(status_code=400, detail="Неверный логин или пароль")
+
+        if db_user.is_2fa_enabled:
+            return {
+                "requires_2fa": True,
+                "login": db_user.login,
+                "message": "Введите код из приложения-аутентификатора"
+            }
+
+        return {
+            "requires_2fa": False,
+            "message": "Вход выполнен успешно",
+            "id": db_user.id,
+            "login": db_user.login
+        }
+
+
+@app.post("/login/verify-2fa")
+async def login_verify_2fa(data: Verify2FARequest):
+    async with SessionLocal() as session:
+        result = await session.execute(
+            select(User).where(User.login == data.login)
+        )
+        db_user = result.scalar_one_or_none()
+
+        if db_user is None:
+            raise HTTPException(status_code=400, detail="Пользователь не найден")
+
+        if not db_user.is_2fa_enabled or not db_user.totp_secret:
+            raise HTTPException(status_code=400, detail="2FA не включен")
+
+        totp = pyotp.TOTP(db_user.totp_secret)
+
+        if not totp.verify(data.otp_code):
+            raise HTTPException(status_code=400, detail="Неверный одноразовый код")
 
         return {
             "message": "Вход выполнен успешно",

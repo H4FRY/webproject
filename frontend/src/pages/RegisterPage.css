@@ -302,4 +302,27 @@ body,
     width: calc(100% - 24px);
     text-align: center;
   }
+
+}
+.register-qr-block {
+  display: flex;
+  justify-content: center;
+  margin: 8px 0 18px;
+}
+
+.register-qr-image {
+  width: 220px;
+  height: 220px;
+  object-fit: contain;
+  border-radius: 18px;
+  padding: 12px;
+  background: #ffffff;
+}
+
+.register-qr-note {
+  margin: 0 0 18px;
+  text-align: center;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.45;
 }

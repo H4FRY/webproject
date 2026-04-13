@@ -52,15 +52,17 @@ function RegisterPage() {
         return;
       }
 
-      setMessage(`Пользователь ${data.login} успешно зарегистрирован`);
-      setForm({
-        login: "",
-        password: "",
-      });
+      setMessage("Аккаунт создан. Переход к подтверждению 2FA...");
 
       setTimeout(() => {
-        navigate("/login");
-      }, 1200);
+        navigate("/register/confirm-2fa", {
+          state: {
+            login: data.login,
+            qrCodeBase64: data.qr_code_base64,
+            otpauthUrl: data.otpauth_url,
+          },
+        });
+      }, 700);
     } catch (err) {
       setError("Не удалось подключиться к серверу");
     } finally {

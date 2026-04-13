@@ -47,6 +47,13 @@ function LoginPage() {
         return;
       }
 
+      if (data.requires_2fa) {
+        navigate("/login/verify-2fa", {
+          state: { login: data.login },
+        });
+        return;
+      }
+
       navigate("/");
     } catch (err) {
       setError("Не удалось подключиться к серверу");
