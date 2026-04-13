@@ -39,7 +39,7 @@ function MfaPage() {
         return;
       }
 
-      navigate("/");
+      navigate("/chat");
     } catch (err) {
       setError("Не удалось подключиться к серверу");
     } finally {

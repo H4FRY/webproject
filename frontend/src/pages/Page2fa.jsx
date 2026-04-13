@@ -47,7 +47,7 @@ function Page2fa() {
       setMessage("2FA успешно подключен");
 
       setTimeout(() => {
-        navigate("/login");
+        navigate("/chat");
       }, 1000);
     } catch (err) {
       setError("Не удалось подтвердить 2FA");

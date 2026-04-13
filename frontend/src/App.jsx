@@ -4,6 +4,7 @@ import RegisterPage from "./pages/RegisterPage";
 import Page2fa from "./pages/Page2fa";
 import LoginPage from "./pages/LoginPage";
 import MfaPage from "./pages/MfaPage";
+import Chat from "./pages/Chat";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
       <Route path="/register/confirm-2fa" element={<Page2fa />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/login/verify-2fa" element={<MfaPage />} />
+      <Route path="/chat" element={<Chat />} />
     </Routes>
   );
 }
