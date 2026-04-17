@@ -54,7 +54,7 @@ function LoginPage() {
         return;
       }
 
-      navigate("/");
+      navigate("/chat");
     } catch (err) {
       setError("Не удалось подключиться к серверу");
     } finally {
@@ -140,12 +140,6 @@ function LoginPage() {
           <Link to="/register">Нет аккаунта?</Link>
           <Link to="/">Назад</Link>
         </div>
-      </div>
-
-      <div className="login-footer">
-        <a href="/">Условия использования</a>
-        <span>|</span>
-        <a href="/">Политика конфиденциальности</a>
       </div>
     </div>
   );

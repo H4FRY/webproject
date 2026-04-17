@@ -134,11 +134,7 @@ function RegisterPage() {
         </div>
       </div>
 
-      <div className="register-footer">
-        <a href="/">Условия использования</a>
-        <span>|</span>
-        <a href="/">Политика конфиденциальности</a>
-      </div>
+
     </div>
   );
 }

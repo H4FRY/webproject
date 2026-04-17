@@ -1,18 +1,29 @@
 import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 import "./Page2fa.css";
 
 function Page2fa() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
 
   const [theme] = useState(() => {
     return localStorage.getItem("app-theme") || "dark";
   });
 
-  const login = location.state?.login || "";
-  const qrCodeBase64 = location.state?.qrCodeBase64 || "";
-  const otpauthUrl = location.state?.otpauthUrl || "";
+  const login =
+    location.state?.login || searchParams.get("login") || "";
+
+  const qrCodeBase64 =
+    location.state?.qrCodeBase64 || searchParams.get("qr") || "";
+
+  const otpauthUrl =
+    location.state?.otpauthUrl || searchParams.get("otpauth") || "";
 
   const [otpCode, setOtpCode] = useState("");
   const [loading, setLoading] = useState(false);
@@ -64,7 +75,7 @@ function Page2fa() {
         <div className="page2fa-card">
           <h1>Нет данных для подтверждения</h1>
           <p className="page2fa-subtitle">
-            Сначала завершите регистрацию
+            Сначала завершите регистрацию или вход через GitHub
           </p>
 
           <div className="page2fa-links single">
@@ -125,7 +136,7 @@ function Page2fa() {
         </form>
 
         <div className="page2fa-links">
-          <Link to="/register">Назад</Link>
+          <Link to="/login">Назад</Link>
         </div>
       </div>
 

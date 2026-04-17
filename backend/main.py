@@ -1,20 +1,30 @@
 import re
 import io
 import base64
+import secrets
 
 import pyotp
 import qrcode
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, field_validator
 from sqlalchemy import select
 from pwdlib import PasswordHash
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
+from authlib.integrations.starlette_client import OAuth
+from urllib.parse import urlencode
 
 from bd.config import SessionLocal
 from bd.modeldb import User
 
 app = FastAPI()
+
+app.add_middleware(
+    SessionMiddleware,
+    secret_key="Qw8L7mYgT3rP0xK9nV2cA5uH1jD6sF4zB8wR2tN7"
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -32,12 +42,49 @@ PASSWORD_LOWER_REGEX = re.compile(r"[a-z]")
 PASSWORD_DIGIT_REGEX = re.compile(r"\d")
 PASSWORD_SPECIAL_REGEX = re.compile(r"[^\w\s]")
 
+# Временно захардкожено для локальной проверки
+GITHUB_CLIENT_ID = "Ov23liQf2xLci0jwiHAc"
+GITHUB_CLIENT_SECRET = "5e5247a749e2bd8d605adcfcc3e6ff9333236500"
+
+oauth = OAuth()
+oauth.register(
+    name="github",
+    client_id=GITHUB_CLIENT_ID,
+    client_secret=GITHUB_CLIENT_SECRET,
+    access_token_url="https://github.com/login/oauth/access_token",
+    authorize_url="https://github.com/login/oauth/authorize",
+    api_base_url="https://api.github.com/",
+    client_kwargs={"scope": "read:user user:email"},
+)
+
 
 def make_qr_base64(data: str) -> str:
     img = qrcode.make(data)
     buffer = io.BytesIO()
     img.save(buffer, format="PNG")
     return base64.b64encode(buffer.getvalue()).decode("utf-8")
+
+
+async def generate_unique_login(session, base_login: str) -> str:
+    candidate = (base_login or "github_user")[:32]
+
+    result = await session.execute(select(User).where(User.login == candidate))
+    existing = result.scalar_one_or_none()
+    if existing is None:
+        return candidate
+
+    for _ in range(100):
+        suffix = secrets.token_hex(2)
+        candidate = f"{base_login[:27]}_{suffix}"[:32]
+        result = await session.execute(select(User).where(User.login == candidate))
+        existing = result.scalar_one_or_none()
+        if existing is None:
+            return candidate
+
+    raise HTTPException(
+        status_code=500,
+        detail="Не удалось сгенерировать уникальный логин"
+    )
 
 
 class RegisterRequest(BaseModel):
@@ -78,9 +125,11 @@ class LoginRequest(BaseModel):
     login: str
     password: str
 
+
 class Verify2FARequest(BaseModel):
     login: str
     otp_code: str
+
 
 @app.get("/")
 async def root():
@@ -168,6 +217,12 @@ async def login(user: LoginRequest):
         if db_user is None:
             raise HTTPException(status_code=400, detail="Неверный логин или пароль")
 
+        if not db_user.password_hash:
+            raise HTTPException(
+                status_code=400,
+                detail="Для этого аккаунта используйте вход через GitHub"
+            )
+
         if not password_hash.verify(user.password, db_user.password_hash):
             raise HTTPException(status_code=400, detail="Неверный логин или пароль")
 
@@ -210,3 +265,95 @@ async def login_verify_2fa(data: Verify2FARequest):
             "id": db_user.id,
             "login": db_user.login
         }
+
+
+@app.get("/auth/github/login")
+async def github_login(request: Request):
+    redirect_uri = request.url_for("github_callback")
+    return await oauth.github.authorize_redirect(request, redirect_uri)
+
+
+from urllib.parse import urlencode
+
+@app.get("/auth/github/callback")
+async def github_callback(request: Request):
+    token = await oauth.github.authorize_access_token(request)
+
+    resp = await oauth.github.get("user", token=token)
+    github_user = resp.json()
+
+    github_id = str(github_user["id"])
+    github_login = github_user.get("login") or f"github_{github_id}"
+    github_email = github_user.get("email")
+
+    async with SessionLocal() as session:
+        result = await session.execute(
+            select(User).where(User.github_id == github_id)
+        )
+        db_user = result.scalar_one_or_none()
+
+        if db_user is None:
+            unique_login = await generate_unique_login(session, github_login)
+
+            secret = pyotp.random_base32()
+            totp = pyotp.TOTP(secret)
+            provisioning_uri = totp.provisioning_uri(
+                name=unique_login,
+                issuer_name="POAIBOT"
+            )
+            qr_code_base64 = make_qr_base64(provisioning_uri)
+
+            db_user = User(
+                login=unique_login,
+                password_hash=None,
+                github_id=github_id,
+                github_login=github_login,
+                github_email=github_email,
+                totp_secret=secret,
+                is_2fa_enabled=False,
+            )
+
+            session.add(db_user)
+            await session.commit()
+            await session.refresh(db_user)
+
+            params = urlencode({
+                "login": db_user.login,
+                "qr": qr_code_base64,
+                "otpauth": provisioning_uri,
+            })
+
+            return RedirectResponse(
+                url=f"http://localhost:5173/register/confirm-2fa?{params}"
+            )
+
+        if not db_user.is_2fa_enabled:
+            if not db_user.totp_secret:
+                secret = pyotp.random_base32()
+                db_user.totp_secret = secret
+                await session.commit()
+
+            totp = pyotp.TOTP(db_user.totp_secret)
+            provisioning_uri = totp.provisioning_uri(
+                name=db_user.login,
+                issuer_name="POAIBOT"
+            )
+            qr_code_base64 = make_qr_base64(provisioning_uri)
+
+            params = urlencode({
+                "login": db_user.login,
+                "qr": qr_code_base64,
+                "otpauth": provisioning_uri,
+            })
+
+            return RedirectResponse(
+                url=f"http://localhost:5173/register/confirm-2fa?{params}"
+            )
+
+        params = urlencode({
+            "login": db_user.login,
+        })
+
+        return RedirectResponse(
+            url=f"http://localhost:5173/login/verify-2fa?{params}"
+        )

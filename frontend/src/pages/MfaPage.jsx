@@ -1,16 +1,24 @@
 import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 import "./MfaPage.css";
 
 function MfaPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
 
   const [theme] = useState(() => {
     return localStorage.getItem("app-theme") || "dark";
   });
 
-  const login = location.state?.login || "";
+  const login =
+    location.state?.login || searchParams.get("login") || "";
+
   const [otpCode, setOtpCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -51,9 +59,13 @@ function MfaPage() {
     return (
       <div className={`mfa-page ${theme}`}>
         <div className="mfa-brand">POAIBOT</div>
+
         <div className="mfa-card">
           <h1>Нет данных для входа</h1>
-          <p className="mfa-subtitle">Сначала выполните вход по логину и паролю</p>
+          <p className="mfa-subtitle">
+            Сначала выполните вход по логину, паролю или через GitHub
+          </p>
+
           <div className="mfa-links single">
             <Link to="/login">Назад ко входу</Link>
           </div>
