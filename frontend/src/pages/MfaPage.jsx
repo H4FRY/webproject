@@ -16,8 +16,8 @@ function MfaPage() {
     return localStorage.getItem("app-theme") || "dark";
   });
 
-  const login =
-    location.state?.login || searchParams.get("login") || "";
+  const email =
+    location.state?.email || searchParams.get("email") || "";
 
   const [otpCode, setOtpCode] = useState("");
   const [loading, setLoading] = useState(false);
@@ -35,7 +35,7 @@ function MfaPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          login,
+          email,
           otp_code: otpCode,
         }),
       });
@@ -55,7 +55,7 @@ function MfaPage() {
     }
   }
 
-  if (!login) {
+  if (!email) {
     return (
       <div className={`mfa-page ${theme}`}>
         <div className="mfa-brand">POAIBOT</div>
@@ -63,7 +63,7 @@ function MfaPage() {
         <div className="mfa-card">
           <h1>Нет данных для входа</h1>
           <p className="mfa-subtitle">
-            Сначала выполните вход по логину, паролю или через GitHub
+            Сначала выполните вход по email, паролю или через GitHub
           </p>
 
           <div className="mfa-links single">

@@ -11,6 +11,7 @@ function RegisterPage() {
 
   const [form, setForm] = useState({
     login: "",
+    email: "",
     password: "",
   });
 
@@ -57,7 +58,7 @@ function RegisterPage() {
       setTimeout(() => {
         navigate("/register/confirm-2fa", {
           state: {
-            login: data.login,
+            email: data.email,
             qrCodeBase64: data.qr_code_base64,
             otpauthUrl: data.otpauth_url,
           },
@@ -77,7 +78,7 @@ function RegisterPage() {
       <div className="register-card">
         <h1>Создайте аккаунт</h1>
         <p className="register-subtitle">
-          Введите логин и пароль для регистрации
+          Введите логин, email и пароль для регистрации
         </p>
 
         <form className="register-form" onSubmit={handleSubmit}>
@@ -93,6 +94,20 @@ function RegisterPage() {
               autoComplete="username"
             />
             <small>3–32 символа: латиница, цифры, . _ -</small>
+          </div>
+
+          <div className="register-field">
+            <label htmlFor="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              placeholder="Введите email"
+              autoComplete="email"
+            />
+            <small>Email должен быть уникальным</small>
           </div>
 
           <div className="register-field">
@@ -133,8 +148,6 @@ function RegisterPage() {
           <Link to="/">Назад</Link>
         </div>
       </div>
-
-
     </div>
   );
 }

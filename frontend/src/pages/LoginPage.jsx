@@ -10,7 +10,7 @@ function LoginPage() {
   });
 
   const [form, setForm] = useState({
-    login: "",
+    email: "",
     password: "",
   });
 
@@ -49,7 +49,7 @@ function LoginPage() {
 
       if (data.requires_2fa) {
         navigate("/login/verify-2fa", {
-          state: { login: data.login },
+          state: { email: data.email },
         });
         return;
       }
@@ -95,15 +95,15 @@ function LoginPage() {
 
         <form className="login-form" onSubmit={handleSubmit}>
           <div className="login-field">
-            <label htmlFor="login">Логин</label>
+            <label htmlFor="email">Email</label>
             <input
-              id="login"
-              type="text"
-              name="login"
-              value={form.login}
+              id="email"
+              type="email"
+              name="email"
+              value={form.email}
               onChange={handleChange}
-              placeholder="Введите логин"
-              autoComplete="username"
+              placeholder="Введите email"
+              autoComplete="email"
             />
           </div>
 

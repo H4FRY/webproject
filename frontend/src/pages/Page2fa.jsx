@@ -16,8 +16,8 @@ function Page2fa() {
     return localStorage.getItem("app-theme") || "dark";
   });
 
-  const login =
-    location.state?.login || searchParams.get("login") || "";
+  const email =
+    location.state?.email || searchParams.get("email") || "";
 
   const qrCodeBase64 =
     location.state?.qrCodeBase64 || searchParams.get("qr") || "";
@@ -43,7 +43,7 @@ function Page2fa() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          login,
+          email,
           otp_code: otpCode,
         }),
       });
@@ -67,7 +67,7 @@ function Page2fa() {
     }
   }
 
-  if (!login || !qrCodeBase64) {
+  if (!email || !qrCodeBase64) {
     return (
       <div className={`page2fa-page ${theme}`}>
         <div className="page2fa-brand">POAIBOT</div>
