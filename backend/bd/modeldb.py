@@ -20,6 +20,11 @@ class User(Base):
     is_2fa_enabled = Column(Boolean, nullable=False, default=False)
     created_at = Column(DateTime, server_default=func.now())
 
+    google_id = Column(String(128), unique=True, nullable=True, index=True)
+    google_email = Column(String(255), nullable=True)
+    google_name = Column(String(255), nullable=True)
+    google_picture = Column(String(500), nullable=True)
+
     chats = relationship("Chat", back_populates="user", cascade="all, delete-orphan")
 
 

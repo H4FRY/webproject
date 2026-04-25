@@ -11,3 +11,13 @@ oauth.register(
     api_base_url="https://api.github.com/",
     client_kwargs={"scope": settings.github_scope},
 )
+
+oauth.register(
+
+    name="google",
+    client_id=settings.google_client_id,
+    client_secret=settings.google_client_secret,
+    server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
+    client_kwargs={"scope": settings.google_scope},
+
+)

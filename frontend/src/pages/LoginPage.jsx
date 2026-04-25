@@ -19,6 +19,13 @@ function LoginPage() {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  function handleGoogleLogin() {
+    setGoogleLoading(true);
+    window.location.href = "http://localhost:8000/auth/google/login";
+  }
+
   function handleChange(e) {
     setForm((prev) => ({
       ...prev,
@@ -86,6 +93,15 @@ function LoginPage() {
         >
           <span className="login-github-icon">◎</span>
           {githubLoading ? "Переход..." : "Продолжить с GitHub"}
+        </button>
+
+        <button
+          type="button"
+          className="login-oauth-btn"
+          onClick={handleGoogleLogin}
+          disabled={googleLoading}
+        >
+          {googleLoading ? "Переход..." : "Продолжить с Google"}
         </button>
 
         <div className="login-divider">

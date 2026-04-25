@@ -2,6 +2,10 @@ class Settings:
     session_secret_key = "Qw8L7mYgT3rP0xK9nV2cA5uH1jD6sF4zB8wR2tN7"
     cors_origins = ["http://localhost:5173", "http://localhost:5174"]
 
+    google_client_id = "gg"
+    google_client_secret = "aa"
+    google_scope = "openid email profile"
+
     github_client_id = "Ov23liQf2xLci0jwiHAc"
     github_client_secret = "e72c480191e6c0a2b29c520a1ed98f8f2adbe080"
 
