@@ -4,7 +4,9 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from api.routes.auth import router as auth_router
 from api.routes.oauth import router as oauth_router
+from api.routes.chat import router as chat_router
 from core.config import settings
+
 
 app = FastAPI()
 
@@ -22,6 +24,7 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
+app.include_router(chat_router)
 app.include_router(oauth_router)
 
 
