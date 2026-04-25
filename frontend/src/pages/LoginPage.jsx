@@ -32,11 +32,12 @@ function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/login", {
+      const response = await fetch("http://localhost:8000/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify(form),
       });
 
@@ -64,7 +65,7 @@ function LoginPage() {
 
   function handleGithubLogin() {
     setGithubLoading(true);
-    window.location.href = "http://127.0.0.1:8000/auth/github/login";
+    window.location.href = "http://localhost:8000/auth/github/login";
   }
 
   return (

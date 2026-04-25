@@ -34,11 +34,12 @@ function RegisterPage() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/register", {
+      const response = await fetch("http://localhost:8000/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify(form),
       });
 
@@ -93,7 +94,6 @@ function RegisterPage() {
               placeholder="Введите логин"
               autoComplete="username"
             />
-            <small>3–32 символа: латиница, цифры, . _ -</small>
           </div>
 
           <div className="register-field">
@@ -107,7 +107,6 @@ function RegisterPage() {
               placeholder="Введите email"
               autoComplete="email"
             />
-            <small>Email должен быть уникальным</small>
           </div>
 
           <div className="register-field">
@@ -130,9 +129,6 @@ function RegisterPage() {
                 {showPassword ? "Скрыть" : "Показать"}
               </button>
             </div>
-            <small>
-              Минимум 8 символов, заглавная, строчная, цифра, спецсимвол
-            </small>
           </div>
 
           <button type="submit" className="register-submit" disabled={loading}>

@@ -48,7 +48,7 @@ class AuthService:
         user.is_2fa_enabled = True
         await self.repo.commit()
 
-        return {"message": "Регистрация завершена, 2FA успешно включен"}
+        return user
 
     async def login(self, email: str, password: str):
         user = await self.repo.get_by_email(email)
@@ -73,10 +73,7 @@ class AuthService:
 
         return {
             "requires_2fa": False,
-            "message": "Вход выполнен успешно",
-            "id": user.id,
-            "login": user.login,
-            "email": user.email,
+            "user": user,
         }
 
     async def verify_login_2fa(self, email: str, otp_code: str):
@@ -90,9 +87,4 @@ class AuthService:
         if not verify_totp_code(user.totp_secret, otp_code):
             raise HTTPException(status_code=400, detail="Неверный одноразовый код")
 
-        return {
-            "message": "Вход выполнен успешно",
-            "id": user.id,
-            "login": user.login,
-            "email": user.email,
-        }
+        return user

@@ -3,10 +3,23 @@ class Settings:
     cors_origins = ["http://localhost:5173", "http://localhost:5174"]
 
     github_client_id = "Ov23liQf2xLci0jwiHAc"
-    github_client_secret = "cbdd0d60337def35ea4bfac3241954178ea145f2"
+    github_client_secret = "e72c480191e6c0a2b29c520a1ed98f8f2adbe080"
 
     github_scope = "read:user user:email"
     issuer_name = "POAIBOT"
 
+    jwt_secret_key = "1d2f4YJ2M3xI5QfQJ7f7v4HCFYHhP0A4WvDk0n2f7uZ5jS8QnCk7eL3pM9xTqAbC"
+    jwt_algorithm = "HS256"
+
+    access_token_expire_minutes = 15
+    refresh_token_expire_days = 30
+
+    access_cookie_name = "access_token"
+    refresh_cookie_name = "refresh_token"
+
+    cookie_secure = False
+    cookie_samesite = "lax"
 
 settings = Settings()
+
+
