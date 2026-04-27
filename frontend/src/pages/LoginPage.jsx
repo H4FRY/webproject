@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import githubLightIcon from "../assets/github-light.svg";
+import githubDarkIcon from "../assets/github-dark.svg";
+import googleIcon from "../assets/google.svg";
 import "./LoginPage.css";
 
 function LoginPage() {
@@ -16,14 +19,18 @@ function LoginPage() {
 
   const [loading, setLoading] = useState(false);
   const [githubLoading, setGithubLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-
-  const [googleLoading, setGoogleLoading] = useState(false);
 
   function handleGoogleLogin() {
     setGoogleLoading(true);
     window.location.href = "http://localhost:8000/auth/google/login";
+  }
+
+  function handleGithubLogin() {
+    setGithubLoading(true);
+    window.location.href = "http://localhost:8000/auth/github/login";
   }
 
   function handleChange(e) {
@@ -70,11 +77,6 @@ function LoginPage() {
     }
   }
 
-  function handleGithubLogin() {
-    setGithubLoading(true);
-    window.location.href = "http://localhost:8000/auth/github/login";
-  }
-
   return (
     <div className={`login-page ${theme}`}>
       <div className="login-brand">POAIBOT</div>
@@ -82,27 +84,38 @@ function LoginPage() {
       <div className="login-card">
         <h1>Войти</h1>
         <p className="login-subtitle">
-          Войдите в аккаунт или продолжите через GitHub
+          Войдите в аккаунт или продолжите через GitHub и Google
         </p>
 
-        <button
-          type="button"
-          className="login-oauth-btn"
-          onClick={handleGithubLogin}
-          disabled={githubLoading}
-        >
-          <span className="login-github-icon">◎</span>
-          {githubLoading ? "Переход..." : "Продолжить с GitHub"}
-        </button>
+        <div className="login-oauth-group">
+          <button
+            type="button"
+            className="login-oauth-btn"
+            onClick={handleGithubLogin}
+            disabled={githubLoading}
+          >
+            <img
+              src={theme === "dark" ? githubLightIcon : githubDarkIcon}
+              alt="GitHub"
+              className="login-oauth-icon-img"
+            />
+            {githubLoading ? "Переход..." : "Продолжить с GitHub"}
+          </button>
 
-        <button
-          type="button"
-          className="login-oauth-btn"
-          onClick={handleGoogleLogin}
-          disabled={googleLoading}
-        >
-          {googleLoading ? "Переход..." : "Продолжить с Google"}
-        </button>
+          <button
+            type="button"
+            className="login-oauth-btn"
+            onClick={handleGoogleLogin}
+            disabled={googleLoading}
+          >
+            <img
+              src={googleIcon}
+              alt="Google"
+              className="login-oauth-icon-img"
+            />
+            {googleLoading ? "Переход..." : "Продолжить с Google"}
+          </button>
+        </div>
 
         <div className="login-divider">
           <span></span>

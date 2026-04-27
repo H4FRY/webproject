@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import MarkdownMessage from "../components/MarkdownMessage";
 import "./Chat.css";
 
 const API_URL = "http://localhost:8000";
@@ -10,6 +11,9 @@ function Chat() {
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem("app-theme") || "dark";
   });
+
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [newChatTitle, setNewChatTitle] = useState("");
 
   const [user, setUser] = useState(null);
   const [error, setError] = useState("");
@@ -126,7 +130,14 @@ function Chat() {
     }
   }
 
+  function handleOpenCreateModal() {
+    setNewChatTitle("");
+    setIsCreateModalOpen(true);
+  }
+
   async function handleCreateChat() {
+    const title = newChatTitle.trim() || "Новый чат";
+
     setCreatingChat(true);
     setError("");
 
@@ -138,7 +149,7 @@ function Chat() {
         },
         credentials: "include",
         body: JSON.stringify({
-          title: "Новый чат",
+          title,
         }),
       });
 
@@ -152,6 +163,8 @@ function Chat() {
       setChats((prev) => [data, ...prev]);
       setActiveChatId(data.id);
       setMessages([]);
+      setNewChatTitle("");
+      setIsCreateModalOpen(false);
     } catch (err) {
       setError("Не удалось создать чат");
     } finally {
@@ -277,7 +290,7 @@ function Chat() {
         setChats(data);
       }
     } catch {
-      // тихо игнорируем, локальное обновление уже есть
+        // ignore
     }
   }
 
@@ -308,10 +321,10 @@ function Chat() {
 
           <button
             className="chat-new-btn"
-            onClick={handleCreateChat}
+            onClick={handleOpenCreateModal}
             disabled={creatingChat}
           >
-            {creatingChat ? "Создание..." : "+ Новый чат"}
+            + Новый чат
           </button>
 
           <div className="chat-list">
@@ -323,7 +336,9 @@ function Chat() {
               chats.map((chat) => (
                 <div
                   key={chat.id}
-                  className={`chat-list-item ${chat.id === activeChatId ? "active" : ""}`}
+                  className={`chat-list-item ${
+                    chat.id === activeChatId ? "active" : ""
+                  }`}
                   onClick={() => handleSelectChat(chat.id)}
                 >
                   <button className="chat-list-main-btn" type="button">
@@ -409,7 +424,9 @@ function Chat() {
                 <div className="chat-message-role">
                   {message.role === "assistant" ? "Ассистент" : "Вы"}
                 </div>
-                <div className="chat-message-content">{message.content}</div>
+                <div className="chat-message-content">
+                  <MarkdownMessage content={message.content} theme={theme} />
+                </div>
               </div>
             ))}
         </section>
@@ -437,6 +454,64 @@ function Chat() {
           </button>
         </form>
       </main>
+
+      {isCreateModalOpen && (
+        <div
+          className="chat-modal-overlay"
+          onClick={() => {
+            if (!creatingChat) {
+              setIsCreateModalOpen(false);
+              setNewChatTitle("");
+            }
+          }}
+        >
+          <div
+            className="chat-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2>Создать новый чат</h2>
+            <p>Введите тему или название чата</p>
+
+            <input
+              className="chat-modal-input"
+              type="text"
+              placeholder="Например: Вопросы по поступлению"
+              value={newChatTitle}
+              onChange={(e) => setNewChatTitle(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !creatingChat) {
+                  handleCreateChat();
+                }
+              }}
+              maxLength={100}
+              autoFocus
+            />
+
+            <div className="chat-modal-actions">
+              <button
+                type="button"
+                className="chat-modal-cancel"
+                onClick={() => {
+                  setIsCreateModalOpen(false);
+                  setNewChatTitle("");
+                }}
+                disabled={creatingChat}
+              >
+                Отмена
+              </button>
+
+              <button
+                type="button"
+                className="chat-modal-create"
+                onClick={handleCreateChat}
+                disabled={creatingChat}
+              >
+                {creatingChat ? "Создание..." : "Создать"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

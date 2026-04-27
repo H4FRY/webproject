@@ -122,6 +122,14 @@ body,
   line-height: 1.55;
 }
 
+/* OAuth group */
+.login-oauth-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
 .login-oauth-btn {
   width: 100%;
   min-height: 50px;
@@ -150,9 +158,20 @@ body,
   transform: none;
 }
 
-.login-github-icon {
-  font-size: 18px;
-  line-height: 1;
+/* SVG icons */
+.login-oauth-icon {
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.login-oauth-icon svg {
+  width: 20px;
+  height: 20px;
+  display: block;
 }
 
 .login-divider {
@@ -346,4 +365,47 @@ body,
     width: calc(100% - 24px);
     text-align: center;
   }
+}
+
+.login-oauth-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.login-oauth-btn {
+  width: 100%;
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: 999px;
+  border: 1px solid var(--oauth-border);
+  background: var(--oauth-bg);
+  color: var(--oauth-text);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.login-oauth-btn:hover {
+  background: var(--oauth-hover);
+  transform: translateY(-1px);
+}
+
+.login-oauth-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.login-oauth-icon-img {
+  width: 20px;
+  height: 20px;
+  display: block;
+  flex-shrink: 0;
+  object-fit: contain;
 }
