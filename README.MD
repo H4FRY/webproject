@@ -98,7 +98,12 @@ hf download bartowski/Qwen2.5-3B-Instruct-GGUF Qwen2.5-3B-Instruct-IQ4_XS.gguf -
 ```
 или 
 ``` bash
-huggingface-cli download bartowski/Qwen2.5-3B-Instruct-GGUF Qwen2.5-3B-Instruct-IQ4_XS.gguf --local-dir backend/model
+huggingface-cli download bartowski/Qwen2.5-3B-Instruct-GGUF Qwen2.5-3B-Instruct-IQ4_XS.gguf --local-dir backend/models
+```
+и потом переименовать
+
+``` bash
+mv backend/models/Qwen2.5-3B-Instruct-IQ4_XS.gguf backend/models/model.gguf 
 ```
 
 ## 2. Создать файл .env
