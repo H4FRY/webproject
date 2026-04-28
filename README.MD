@@ -106,43 +106,76 @@ huggingface-cli download bartowski/Qwen2.5-3B-Instruct-GGUF Qwen2.5-3B-Instruct-
 Создай файл backend/.env
 Пример содержимого:
 ``` 
-SESSION_SECRET_KEY=your_session_secret # пример как получить python -c "import secrets; print(secrets.token_urlsafe(32))"
-CORS_ORIGINS=http://localhost:5173,http://localhost:5174 # можно оставить так
+SESSION_SECRET_KEY=your_session_secret
+CORS_ORIGINS=http://localhost:5173,http://localhost:5174
 
-#берешь в гугл
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
-GOOGLE_SCOPE=openid email profile # можно оставить так
+GOOGLE_SCOPE=openid email profile
 
-берешь в гихаб заходишь в настройки разработчика ищешь OAuth Apps и создаешь проект
 GITHUB_CLIENT_ID=your_github_client_id
 GITHUB_CLIENT_SECRET=your_github_client_secret
-GITHUB_SCOPE=read:user user:email # можно оставить так
+GITHUB_SCOPE=read:user user:email
 
-ISSUER_NAME=POAIBOT # можно оставить так
+ISSUER_NAME=POAIBOT
 
 JWT_SECRET_KEY=your_jwt_secret
-JWT_ALGORITHM=HS256 # можно оставить так
+JWT_ALGORITHM=HS256
 
-ACCESS_TOKEN_EXPIRE_MINUTES=15 # можно оставить так
-REFRESH_TOKEN_EXPIRE_DAYS=30 # можно оставить так
+ACCESS_TOKEN_EXPIRE_MINUTES=15
+REFRESH_TOKEN_EXPIRE_DAYS=30
 
 ACCESS_COOKIE_NAME=access_token
 REFRESH_COOKIE_NAME=refresh_token
 
-COOKIE_SECURE=False # можно оставить так
-COOKIE_SAMESITE=lax # можно оставить так
+COOKIE_SECURE=False
+COOKIE_SAMESITE=lax
 
-DB_USER=postgres 
+DB_USER=postgres
 DB_PASSWORD=postgres
 DB_HOST=db
 DB_PORT=5432
 DB_NAME=webapp
 
-REDIS_URL=redis://redis:6379/0 # можно оставить так
+REDIS_URL=redis://redis:6379/0
 ```
+## Пояснение по переменным
+### SESSION_SECRET_KEY
 
+Секретный ключ для сессий. Его можно сгенерировать так:
 
+``` bash
+python -c "import secrets; print(secrets.token_urlsafe(32))"
+```
+### GOOGLE_CLIENT_ID и GOOGLE_CLIENT_SECRET
+
+Получаются в Google Cloud Console при создании OAuth-приложения.
+
+### GITHUB_CLIENT_ID и GITHUB_CLIENT_SECRET
+
+Получаются в GitHub:
+Settings -> Developer settings -> OAuth Apps
+
+### JWT_SECRET_KEY
+Секретный ключ для JWT. Его можно сгенерировать так:
+``` bash
+python -c "import secrets; print(secrets.token_urlsafe(48))"
+```
+## Значения, которые можно оставить без изменений
+
+Обычно без изменений можно оставить:
+```
+CORS_ORIGINS=http://localhost:5173,http://localhost:5174
+GOOGLE_SCOPE=openid email profile
+GITHUB_SCOPE=read:user user:email
+ISSUER_NAME=POAIBOT
+JWT_ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=15
+REFRESH_TOKEN_EXPIRE_DAYS=30
+COOKIE_SECURE=False
+COOKIE_SAMESITE=lax 
+REDIS_URL=redis://redis:6379/0
+```
 ## Запуск через Docker
 
 Из корня проекта выполни:
