@@ -12,7 +12,10 @@ class ChatService:
         self.llm_service = LLMService()
 
     async def create_chat(self, user_id: int, title: str | None):
-        return await self.chat_repo.create_chat(user_id=user_id, title=title or "Новый чат")
+        return await self.chat_repo.create_chat(
+            user_id=user_id,
+            title=title or "Новый чат",
+        )
 
     async def list_chats(self, user_id: int):
         return await self.chat_repo.get_user_chats(user_id)
@@ -33,7 +36,11 @@ class ChatService:
         await self.message_repo.create_message(chat_id=chat_id, role="user", content=content)
 
         messages = await self.message_repo.get_chat_messages(chat_id)
-        llm_messages = [{"role": m.role, "content": m.content} for m in messages if m.role in {"user", "assistant"}]
+        llm_messages = [
+            {"role": m.role, "content": m.content}
+            for m in messages
+            if m.role in {"user", "assistant"}
+        ]
 
         answer = self.llm_service.generate_answer(llm_messages)
 
@@ -44,6 +51,33 @@ class ChatService:
         )
 
         return assistant_message
+
+    async def build_stream_context(self, user_id: int, chat_id: int, content: str):
+        chat = await self.chat_repo.get_chat_by_id(chat_id, user_id)
+        if not chat:
+            raise HTTPException(status_code=404, detail="Чат не найден")
+
+        await self.message_repo.create_message(
+            chat_id=chat_id,
+            role="user",
+            content=content,
+        )
+
+        messages = await self.message_repo.get_chat_messages(chat_id)
+        llm_messages = [
+            {"role": m.role, "content": m.content}
+            for m in messages
+            if m.role in {"user", "assistant"}
+        ]
+
+        return llm_messages
+
+    async def save_assistant_message(self, chat_id: int, content: str):
+        return await self.message_repo.create_message(
+            chat_id=chat_id,
+            role="assistant",
+            content=content,
+        )
 
     async def delete_chat(self, user_id: int, chat_id: int):
         chat = await self.chat_repo.get_chat_by_id(chat_id, user_id)

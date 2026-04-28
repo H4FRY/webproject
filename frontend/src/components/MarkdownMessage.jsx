@@ -2,9 +2,12 @@ import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
+import {
+  oneDark,
+  oneLight,
+} from "react-syntax-highlighter/dist/esm/styles/prism";
 
-function CodeBlock({ inline, className, children, theme }) {
+function CodeBlock({ className, children, theme }) {
   const [copied, setCopied] = useState(false);
 
   const match = /language-(\w+)/.exec(className || "");
@@ -21,10 +24,6 @@ function CodeBlock({ inline, className, children, theme }) {
     }
   }
 
-  if (inline) {
-    return <code className="chat-inline-code">{children}</code>;
-  }
-
   return (
     <div className="chat-code-block">
       <div className="chat-code-header">
@@ -35,7 +34,7 @@ function CodeBlock({ inline, className, children, theme }) {
       </div>
 
       <SyntaxHighlighter
-        language={language}
+        language={language || "text"}
         style={theme === "dark" ? oneDark : oneLight}
         PreTag="div"
         customStyle={{
@@ -56,13 +55,19 @@ function MarkdownMessage({ content, theme }) {
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
       components={{
-        code({ inline, className, children }) {
+        code({ className, children, ...props }) {
+          const isBlock = Boolean(className);
+
+          if (!isBlock) {
+            return (
+              <code className="chat-inline-code" {...props}>
+                {children}
+              </code>
+            );
+          }
+
           return (
-            <CodeBlock
-              inline={inline}
-              className={className}
-              theme={theme}
-            >
+            <CodeBlock className={className} theme={theme}>
               {children}
             </CodeBlock>
           );

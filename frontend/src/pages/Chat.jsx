@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MarkdownMessage from "../components/MarkdownMessage";
 import "./Chat.css";
@@ -7,6 +7,8 @@ const API_URL = "http://localhost:8000";
 
 function Chat() {
   const navigate = useNavigate();
+
+  const messagesEndRef = useRef(null);
 
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem("app-theme") || "dark";
@@ -30,6 +32,14 @@ function Chat() {
   const [sending, setSending] = useState(false);
   const [creatingChat, setCreatingChat] = useState(false);
   const [deletingChatId, setDeletingChatId] = useState(null);
+
+  function scrollToBottom(behavior = "auto") {
+    messagesEndRef.current?.scrollIntoView({ behavior, block: "end" });
+  }
+
+  useEffect(() => {
+    scrollToBottom("auto");
+  }, [messages]);
 
   const activeChat = useMemo(() => {
     return chats.find((chat) => chat.id === activeChatId) || null;
@@ -225,18 +235,28 @@ function Chat() {
     setSending(true);
     setError("");
 
+    const tempUserId = `temp-user-${Date.now()}`;
+    const tempAssistantId = `temp-assistant-${Date.now() + 1}`;
+
     const optimisticUserMessage = {
-      id: `temp-user-${Date.now()}`,
+      id: tempUserId,
       role: "user",
       content: value,
       created_at: new Date().toISOString(),
     };
 
-    setMessages((prev) => [...prev, optimisticUserMessage]);
+    const optimisticAssistantMessage = {
+      id: tempAssistantId,
+      role: "assistant",
+      content: "",
+      created_at: new Date().toISOString(),
+    };
+
+    setMessages((prev) => [...prev, optimisticUserMessage, optimisticAssistantMessage]);
     setInput("");
 
     try {
-      const response = await fetch(`${API_URL}/chats/${activeChatId}/messages`, {
+      const response = await fetch(`${API_URL}/chats/${activeChatId}/messages/stream`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -247,21 +267,50 @@ function Chat() {
         }),
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
+      if (!response.ok || !response.body) {
+        const data = await response.json();
         setMessages((prev) =>
-          prev.filter((message) => message.id !== optimisticUserMessage.id)
+          prev.filter(
+            (message) =>
+              message.id !== tempUserId && message.id !== tempAssistantId
+          )
         );
         setError(data.detail || "Не удалось отправить сообщение");
         return;
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+
+      let accumulated = "";
+      let done = false;
+
+      while (!done) {
+        const result = await reader.read();
+        done = result.done;
+
+        if (result.value) {
+          const chunk = decoder.decode(result.value, { stream: true });
+          accumulated += chunk;
+
+          setMessages((prev) =>
+            prev.map((message) =>
+              message.id === tempAssistantId
+                ? { ...message, content: accumulated }
+                : message
+            )
+          );
+        }
       }
 
       await loadChatMessages(activeChatId);
       await refreshChatsTitles(activeChatId, value);
     } catch (err) {
       setMessages((prev) =>
-        prev.filter((message) => message.id !== optimisticUserMessage.id)
+        prev.filter(
+          (message) =>
+            message.id !== tempUserId && message.id !== tempAssistantId
+        )
       );
       setError("Не удалось отправить сообщение");
     } finally {
@@ -303,7 +352,7 @@ function Chat() {
     } catch (err) {
       console.error("Ошибка выхода");
     } finally {
-      navigate("/login");
+      navigate("/");
     }
   }
 
@@ -429,6 +478,7 @@ function Chat() {
                 </div>
               </div>
             ))}
+          <div ref={messagesEndRef} />
         </section>
 
         <form className="chat-input-wrap" onSubmit={handleSendMessage}>
