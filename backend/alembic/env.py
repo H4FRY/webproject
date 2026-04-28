@@ -14,11 +14,17 @@ config = context.config
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
-database_url = os.getenv("ALEMBIC_DATABASE_URL")
-if not database_url:
-    raise RuntimeError("ALEMBIC_DATABASE_URL не найден в .env")
+DB_USER = os.getenv("DB_USER", "postgres")
+DB_PASSWORD = os.getenv("DB_PASSWORD", "")
+DB_HOST = os.getenv("DB_HOST", "127.0.0.1")
+DB_PORT = os.getenv("DB_PORT", "5432")
+DB_NAME = os.getenv("DB_NAME", "webapp")
 
-config.set_main_option("sqlalchemy.url", database_url)
+ALEMBIC_DATABASE_URL = f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+
+print("ALEMBIC_DATABASE_URL =", ALEMBIC_DATABASE_URL)
+
+config.set_main_option("sqlalchemy.url", ALEMBIC_DATABASE_URL)
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
